@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Mybatis 설정 파일임을 선언 (https ~ : config를 가져오는 선언 구문)-->
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+  
+<!-- 필요한 설정들을 작성한다. -->
+<configuration>
+  	<!-- 
+  		DB에 연결할 설정 정보들을 선언하는 요소
+  		
+  		default 속성 : 여러 개의 연결 정보 중에서 기본으로 연결할 설정 정보를 지정하는 속성이다.
+  	-->
+  	<environments default="web">
+	  	<environment id="web">
+	  		<!-- 트랜잭션을 제어하기 위한 설정 (JDBC가 직접 commit이나 rollback을 할 수 있도록 설정) -->
+	  		<transactionManager type="JDBC" />
+	  		
+	  		<!-- 실제 DB 접속에 관한 정보를 설정하는 요소 -->
+	  		<dataSource type="POOLED">
+	  			<property name="driver" value="oracle.jdbc.driver.OracleDriver"/>
+	  			<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
+	  			<property name="username" value="WEB"/>
+	  			<property name="password" value="WEB"/>
+	  		</dataSource>
+		</environment>
+	</environments>
+	
+	<!-- Mapper 파일을 등록하는 요소 (사용할 쿼리문을 등록하는 요소) -->
+	<!-- resource : 클래스 패스 기준 (컴파일 후의 classes 하위 폴더 파일을 사용) -->
+	<mappers>
+		<mapper resource="mappers/member/member-mapper.xml"/>
+	
+	</mappers>
+</configuration>
