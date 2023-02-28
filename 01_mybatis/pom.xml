@@ -26,22 +26,36 @@
   <!-- 라이브러리 의존성 설정 -->
   <dependencies>
   
-	  <!-- lombok 라이브러리 -->
-	  <dependency>
-	  		<groupId>org.projectlombok</groupId>
-		    <artifactId>lombok</artifactId>
-		    <version>1.18.26</version>
-		    <scope>provided</scope>
-	  </dependency>
+	<!-- DB 관련 라이브러리 -->
+	<dependency>
+	    <groupId>com.oracle.database.jdbc</groupId>
+	    <artifactId>ojdbc6</artifactId>
+	    <version>11.2.0.4</version>
+	</dependency>
+	
+	<!-- mybatis -->
+	<dependency>
+	    <groupId>org.mybatis</groupId>
+	    <artifactId>mybatis</artifactId>
+	    <version>3.5.11</version>
+	</dependency>
+	
+	<!-- lombok 라이브러리 -->
+	<dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<version>1.18.26</version>
+		<scope>provided</scope>
+	</dependency>
   
-	  <!-- 테스트 관련 라이브러리 -->
-	  <dependency>
-	      <groupId>junit</groupId>
-	      <artifactId>junit</artifactId>
-	      <version>4.11</version>
-	      <scope>test</scope>
-	  </dependency>
-  </dependencies>
+	<!-- 테스트 관련 라이브러리 -->
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.11</version>
+		<scope>test</scope>
+		</dependency>
+	</dependencies>
   
   <!-- 프로젝트 빌드에 대한 설정 -->
   <build>
