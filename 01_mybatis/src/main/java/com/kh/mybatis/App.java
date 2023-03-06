@@ -16,11 +16,11 @@ public class App
         
 //      SqlSession session = SqlSessionTemplate.getSession();
         
-        int count = 0;
-        SqlSession session  = getSession(); // SqlSessionTemplate 클래스명 생략 
-        
-        count = session.selectOne("memberMapper.selectCount");
-        
-        System.out.println("Count : " + count);
+//        int count = 0;
+//        SqlSession session = getSession(); // SqlSessionTemplate 클래스명 생략 
+//        
+//        count = session.selectOne("memberMapper.selectCount");
+//        
+//        System.out.println("Count : " + count);
     }
 }

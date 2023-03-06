@@ -7,6 +7,23 @@
   
 <!-- 필요한 설정들을 작성한다. -->
 <configuration>
+	
+	<!-- DB 연결 정보를 외부 properties 파일에서 불러오기 위한 요소 -->
+	<properties resource="driver.properties" />
+
+	<!-- 
+	<properties>
+		<property name="db.driver" value="oracle.jdbc.driver.OracleDriver"/>
+		<property name="db.url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
+		<property name="db.username" value="WEB"/>
+		<property name="db.password" value="WEB"/>
+	</properties>
+	-->
+
+	<typeAliases>
+		<typeAlias type="com.kh.mybatis.member.model.vo.Member" alias="Member"/>
+	</typeAliases>
+
   	<!-- 
   		DB에 연결할 설정 정보들을 선언하는 요소
   		
@@ -19,10 +36,23 @@
 	  		
 	  		<!-- 실제 DB 접속에 관한 정보를 설정하는 요소 -->
 	  		<dataSource type="POOLED">
+	  			<!-- <property name="driver" value="oracle.jdbc.driver.OracleDriver"/> -->
+	  			<property name="driver" value="${db.driver}"/>
+	  			<!-- <property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"/> -->
+	  			<property name="url" value="${db.url}"/>
+	  			<!-- <property name="username" value="WEB"/> -->
+	  			<property name="username" value="${db.username}"/>
+	  			<!-- <property name="password" value="WEB"/> -->
+	  			<property name="password" value="${db.password}"/>
+	  		</dataSource>
+		</environment>
+	  	<environment id="KH">
+	  		<transactionManager type="JDBC" />
+	  		<dataSource type="POOLED">
 	  			<property name="driver" value="oracle.jdbc.driver.OracleDriver"/>
 	  			<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"/>
-	  			<property name="username" value="WEB"/>
-	  			<property name="password" value="WEB"/>
+	  			<property name="username" value="KH"/>
+	  			<property name="password" value="KH"/>
 	  		</dataSource>
 		</environment>
 	</environments>
@@ -31,6 +61,5 @@
 	<!-- resource : 클래스 패스 기준 (컴파일 후의 classes 하위 폴더 파일을 사용) -->
 	<mappers>
 		<mapper resource="mappers/member/member-mapper.xml"/>
-	
 	</mappers>
 </configuration>

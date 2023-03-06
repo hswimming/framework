@@ -1,11 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- xml 파일임을 선언 -->
 
-<!-- Mapper 설정 파일임을 선언 -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!-- Mapper 설정 파일임을 선언 -->
 
 <!-- mapper : xml 파일의 최상의 요소 -->
 <mapper namespace="memberMapper">
+
+	<!-- 중복되는 쿼리문을 재사용 하기 위한 SQL 조각으로 사용하려는 요소보다 항상 위에 있어야 한다. -->
+	<sql id="selectMemberSql">
+		SELECT NO,
+		       ID,
+		       PASSWORD,
+		       ROLE,
+		       NAME,
+		       PHONE,
+		       EMAIL,
+		       ADDRESS,
+		       HOBBY,
+		       STATUS,
+		       ENROLL_DATE,
+		       MODIFY_DATE
+		FROM MEMBER
+	</sql>
+	
+	<!-- 명시적으로 mapping 할 때 사용 -->
+	<!-- mybatis-config 파일 typeAlias에 class 별칭을 주었기 때문에 패키지명 생략 가능 -->
+	<resultMap id="memberResultMap" type="Member">
+		<!-- 조회 결과의 기본 키 컬럼을 매핑한다. (필드명, 컬럼 기술) -->
+		<id property="no" column="NO"/>
+		
+		<!-- 조회 결과의 일반 컬럼을 매핑한다. -->
+		<result property="id" column="ID"/>
+		<result property="password" column="PASSWORD"/>
+		<result property="role" column="ROLE"/>
+		<result property="name" column="NAME"/>
+		<result property="phone" column="PHONE"/>
+		<result property="email" column="EMAIL"/>
+		<result property="address" column="ADDRESS"/>
+		<result property="hobby" column="HOBBY"/>
+		<result property="status" column="STATUS"/>
+		<result property="enrollDate" column="ENROLL_DATE"/>
+		<result property="modifyDate" column="MODIFY_DATE"/>
+	</resultMap>
+
 	<select id="selectCount" resultType="_int">
 		SELECT COUNT(*) FROM MEMBER
 	</select>
+
+	<!-- 한 행이 어떤 오브젝트로 만들어질지 타입을 지정해줘야 한다. -->
+	<!-- 
+		쿼리문의 수행 결과가 담긴 ResultSet은 resultType의 인스턴스에 자동으로 mapping 되어 리턴된다.
+		단, 조회 결과의 컬럼명과 자바 클래스의 필드명이 동일해야 자동으로 mapping 된다. (대소문자는 구분하지 않는다.)
+		(setter를 사용하여 자동으로 set 해준다.)
+	 -->
+	 
+	<!-- 직접 매핑 할 타입 지정 -->
+	<!-- <select id="selectAll" resultType="com.kh.mybatis.member.model.vo.Member"> -->
+	
+	<!-- resultMap을 사용할 경우 resultType을 사용하면 안 된다. (resultMap의 아이디를 기술) -->
+	<select id="selectAll" resultMap="memberResultMap">
+	
+		<!-- 
+			방법 1) 쿼리문에서 "AS 별칭" 으로 조회되는 컬럼명을 변경한다.
+			
+		SELECT NO,
+		       ID,
+		       PASSWORD,
+		       ROLE,
+		       NAME,
+		       PHONE,
+		       EMAIL,
+		       ADDRESS,
+		       HOBBY,
+		       STATUS,
+		       ENROLL_DATE AS enrollDate,
+		       MODIFY_DATE AS modifyDate
+		FROM MEMBER
+		WHERE STATUS = 'Y'
+		-->
+		
+		<!-- 
+			방법 2) resultMap을 이용해서 명시적으로 컬럼명과 필드명을 mapping 시켜준다.
+			
+		SELECT NO,
+		       ID,
+		       PASSWORD,
+		       ROLE,
+		       NAME,
+		       PHONE,
+		       EMAIL,
+		       ADDRESS,
+		       HOBBY,
+		       STATUS,
+		       ENROLL_DATE,
+		       MODIFY_DATE
+		FROM MEMBER
+		WHERE STATUS = 'Y'
+		-->
+		
+		<!-- 위에서 선언해놓은 Sql 조각을 재사용 하기 위한 요소 -->
+		<include refid="selectMemberSql" />
+		WHERE STATUS = 'Y'
+	</select>
+	
+	<!-- string : 내장별칭 사용으로 소문자로 시작 -->
+	<!-- 
+		외부에서 매개변수로 받는 값이 있으면 (Dao) 해당하는 파라미터의 타입을 지정해야 한다. (parameterType="string")
+		외부에서 매개변수로 받은 값은 #{변수명}으로 값을 가져온다.
+	 -->
+	<select id="selectMemberById" parameterType="string" resultMap="memberResultMap">
+		<!-- 
+		SELECT NO,
+		       ID,
+		       PASSWORD,
+		       ROLE,
+		       NAME,
+		       PHONE,
+		       EMAIL,
+		       ADDRESS,
+		       HOBBY,
+		       STATUS,
+		       ENROLL_DATE,
+		       MODIFY_DATE
+		FROM MEMBER
+		-->
+		
+		<include refid="selectMemberSql" />
+		WHERE ID = #{id} AND STATUS = 'Y'
+	</select>
+	
 </mapper>
