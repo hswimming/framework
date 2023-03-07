@@ -35,4 +35,9 @@ public class Member {
 
 	private Date modifyDate;
 
+	public Member(String id, String password, String name) {
+		this.id = id;
+		this.password = password;
+		this.name = name;
+	}
 }

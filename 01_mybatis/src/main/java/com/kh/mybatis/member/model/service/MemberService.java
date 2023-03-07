@@ -47,5 +47,51 @@ public class MemberService {
 		
 		return member;
 	}
-	
+
+	public int save(Member member) {
+		int result = 0;
+		SqlSession session = getSession();
+		
+		if (member.getNo() > 0) {
+			result = new MemberDao().updateMember(session, member);
+			
+		} else {
+			result = new MemberDao().insertMember(session, member);
+			
+		}
+		
+		// insert 되기 전 멤버 오브젝트에는 NO 값 X insert 이후에 담아주기 때문에 확인 가능
+//		System.out.println(member);
+		
+		if (result > 0) {
+			session.commit();
+			
+		} else {
+			session.rollback();
+			
+		}
+		
+		session.close();
+		
+		return result;
+	}
+
+	public int delete(String id) {
+		int result = 0;
+		SqlSession session = getSession();
+		
+		result = new MemberDao().delete(session, id);
+		
+		if (result > 0) {
+			session.commit();
+			
+		} else {
+			session.rollback();
+			
+		}
+		
+		session.close();
+		
+		return result;
+	}
 }

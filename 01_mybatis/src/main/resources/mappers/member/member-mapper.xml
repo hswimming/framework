@@ -4,8 +4,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <!-- Mapper 설정 파일임을 선언 -->
 
-<!-- mapper : xml 파일의 최상의 요소 -->
 <mapper namespace="memberMapper">
+<!-- mapper : xml 파일의 최상의 요소 -->
 
 	<!-- 중복되는 쿼리문을 재사용 하기 위한 SQL 조각으로 사용하려는 요소보다 항상 위에 있어야 한다. -->
 	<sql id="selectMemberSql">
@@ -130,4 +130,59 @@
 		WHERE ID = #{id} AND STATUS = 'Y'
 	</select>
 	
+	<!--
+		데이터를 insert 후 PK 값을 받아오기 위해서는 useGeneratedKeys, keyColumn, keyProperty 속성을 추가해야 한다.
+			- useGeneratedKeys : insert 후에 PK 값을 받아올 수 있도록 허용하는 속성
+			- keyColumn : PK에 해당하는 컬럼을 지정하는 속성
+			- keyProperty : PK 값이 담길 파라미터 인스턴스의 필드명을 지정하는 속성
+	-->
+	<insert id="insertMember" parameterType="Member"
+			useGeneratedKeys="true" keyColumn="NO" keyProperty="no">
+			<!-- 파라미터로 전달된 멤버 오브젝트로 지정한 필드에 조회 된 컬럼의 값을 담아준다. -->
+		INSERT INTO MEMBER (
+			NO,
+			ID,
+			PASSWORD,
+			ROLE,
+			NAME,
+			PHONE,
+			EMAIL,
+			ADDRESS,
+			HOBBY,
+			STATUS,
+			ENROLL_DATE,
+			MODIFY_DATE
+		) VALUES(
+			SEQ_UNO.NEXTVAL,
+			#{id},
+			#{password},
+			DEFAULT,
+			#{name},
+			#{phone},
+			#{email},
+			#{address},
+			#{hobby},
+			DEFAULT,
+			DEFAULT,
+			DEFAULT
+		)
+		<!-- 파라미터 값을 받을 경우 인스턴스의 필드명을 사용하여 각각의 ...에 접근할 수 있다 -->
+	</insert>
+	
+	<update id="updateMember" parameterType="Member">
+		UPDATE MEMBER 
+		SET 
+			NAME = #{name},
+			PASSWORD = #{password},
+			PHONE = #{phone},
+			EMAIL = #{email},
+			ADDRESS = #{address},
+			HOBBY = #{hobby},
+			MODIFY_DATE = SYSDATE 
+		WHERE NO = #{no}
+	</update>
+	
+	<delete id="deleteMember" parameterType="string">
+		DELETE FROM MEMBER WHERE ID = #{id}
+	</delete>
 </mapper>

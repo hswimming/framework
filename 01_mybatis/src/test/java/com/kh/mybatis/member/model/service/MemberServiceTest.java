@@ -9,13 +9,21 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.kh.mybatis.member.model.vo.Member;
 
+// 테스트 메소드 실행 순서 -> 알파벳 순서
+
 @DisplayName("MemberService 테스트")
+@TestMethodOrder(OrderAnnotation.class)
+//OrderAnnotation -> methodOrder 선택
 class MemberServiceTest {
 	private MemberService service;
 	
@@ -26,8 +34,6 @@ class MemberServiceTest {
 	void setUp() {
 		service = new MemberService();
 	}
-	
-	// 테스트 메소드 실행 순서 -> 알파벳 순서
 
 	// 테스트 할 수 있는 환경인지 확인
 	@Test
@@ -43,6 +49,7 @@ class MemberServiceTest {
 	}
 	
 	@Test
+	@Order(1)
 	@DisplayName("회원 수 조회 테스트")
 	void getMemberCountTest() {
 		int count = 0;
@@ -57,6 +64,7 @@ class MemberServiceTest {
 	}
 	
 	@Test
+	@Order(2)
 	@DisplayName("모든 회원 조회 테스트")
 	void findAllTest() {
 		List<Member> members = null;
@@ -70,7 +78,8 @@ class MemberServiceTest {
 	}
 	
 	@ParameterizedTest
-	@ValueSource(strings = {"admin2", "swimming"}) // 배열 형태로 넣어주기
+	@Order(3)
+	@ValueSource(strings = {"admin2", "swimming"}) // 배열 형태로 넣어주기, 개수만큼 테스트 코드 실행
 	@DisplayName("회원 조회 테스트 (ID로 검색)")
 	void findMemberByIdTest(String id) {
 		Member member = null;
@@ -82,6 +91,58 @@ class MemberServiceTest {
 //		System.out.println(member);
 		
 		assertThat(member).isNotNull();
+		assertThat(member.getId()).isNotNull().isEqualTo(id);
 	}
 	
+	@ParameterizedTest
+	@CsvSource(value = {"test1, 1234, 황수영", "test2, 4567, 보리"})
+	@Order(4)
+	@DisplayName("회원 등록 테스트")
+	// CsvSource : 데이터들을 콤마(,)로 구분하는 포맷
+	void insertMemberTest(String id, String password, String name) {
+		int result = 0;
+		
+		// save 메소드를 테스트 하기 위해 필요한 것만 생성
+		Member member = new Member(id, password, name);
+		
+		// 영향 받은 행의 개수
+		result = service.save(member);
+		
+		assertThat(result).isGreaterThan(0);
+		assertThat(member.getNo()).isGreaterThan(0);
+		assertThat(service.findMemberById(id)).isNotNull(); // DB에 존재하는지 확인
+	}
+	
+	@ParameterizedTest
+	@CsvSource({
+		"test1, 0000, 수수수수",
+		"test2, 9999, 숫숫숫숫"
+	})
+	@DisplayName("회원 정보 수정 테스트")
+	@Order(5)
+	void updateMemberTest(String id, String password, String name) {
+		int result = 0;
+		Member member = service.findMemberById(id);
+		
+		member.setPassword(password);
+		member.setName(name);
+		
+		result = service.save(member);
+		
+		assertThat(result).isGreaterThan(0);
+		assertThat(service.findMemberById(id).getName()).isEqualTo(name);
+	}
+	
+	@ParameterizedTest
+	@ValueSource(strings = {"test1", "test2"})
+	@DisplayName("회원 삭제 테스트")
+	@Order(6)
+	void deleteTest(String id) {
+		int result = 0;
+		
+		result = service.delete(id);
+		
+		assertThat(result).isEqualTo(1); // 유니크 제약조건이 걸려있는 컬럼이므로 결과 값 1
+		assertThat(service.findMemberById(id)).isNull(); // 삭제된 후 null 조회되면 테스트 통과
+	}
 }

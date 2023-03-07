@@ -25,4 +25,18 @@ public class MemberDao {
 		
 	}
 
+	public int insertMember(SqlSession session, Member member) {
+		
+		return session.insert("memberMapper.insertMember", member);
+	}
+
+	public int updateMember(SqlSession session, Member member) {
+		
+		return session.update("memberMapper.updateMember", member);
+	}
+
+	public int delete(SqlSession session, String id) {
+		
+		return session.delete("memberMapper.deleteMember", id);
+	}
 }
