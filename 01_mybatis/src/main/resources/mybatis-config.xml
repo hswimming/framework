@@ -19,9 +19,17 @@
 		<property name="db.password" value="WEB"/>
 	</properties>
 	-->
+	
+	<!-- 마이바티스와 관련된 기본 설정을 선언하는 요소 -->
+	<settings>
+		<!-- 파라미터의 null 값에 대한 JDBC 타입을 지정한다. -->
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
 
 	<typeAliases>
 		<typeAlias type="com.kh.mybatis.member.model.vo.Member" alias="Member"/>
+		<typeAlias type="com.kh.mybatis.board.model.vo.Board" alias="Board"/>
+		<typeAlias type="com.kh.mybatis.board.model.vo.Reply" alias="Reply"/>
 	</typeAliases>
 
   	<!-- 
@@ -61,5 +69,6 @@
 	<!-- resource : 클래스 패스 기준 (컴파일 후의 classes 하위 폴더 파일을 사용) -->
 	<mappers>
 		<mapper resource="mappers/member/member-mapper.xml"/>
+		<mapper resource="mappers/board/board-mapper.xml"/>
 	</mappers>
 </configuration>

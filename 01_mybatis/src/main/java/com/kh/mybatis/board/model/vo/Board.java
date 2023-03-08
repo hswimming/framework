@@ -32,6 +32,9 @@ public class Board {
 	
 	private String status;
 	
+	private String type;
+	
+	// 1대 다의 관계
 	private List<Reply> replies;
 	
 	private Date createDate;

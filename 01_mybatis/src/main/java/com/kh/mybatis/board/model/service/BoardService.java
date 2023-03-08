@@ -46,14 +46,69 @@ public class BoardService {
 		return count;
 	}
 
-	public List<Board> findAll(String writer, String title, String content) {
+	public List<Board> findAll(PageInfo pageInfo, String writer, String title, String content) {
 		List<Board> list = null;
 		SqlSession session = getSession();
 		
-		list = new BoardDao().findAll(session, writer, title, content);
+		list = new BoardDao().findAll(session, pageInfo, writer, title, content);
 		
 		session.close();
 		
 		return list;
+	}
+
+	public int getBoardCount(String type, String keyWord) {
+		int count = 0;
+		SqlSession session = getSession();
+		
+		count = new BoardDao().getBoardCount(session, type, keyWord);
+		
+		session.close();
+		
+		return count;
+	}
+	
+	public List<Board> findAll(PageInfo pageInfo, String type, String keyWord) {
+		List<Board> list = null;
+		SqlSession session = getSession();
+		
+		list = new BoardDao().findAll(session, pageInfo, type, keyWord);
+		
+		session.close();
+		
+		return list;
+	}
+
+	public int getBoardCount(String[] filters) {
+		int count = 0;
+		SqlSession session = getSession();
+		
+		count = new BoardDao().getBoardCount(session, filters);
+		
+		session.close();
+		
+		return count;
+	}
+	
+	public List<Board> findAll(PageInfo pageInfo, String[] filters) {
+		List<Board> list = null;
+		SqlSession session = getSession();
+		
+		list = new BoardDao().findAll(session, pageInfo, filters);
+		
+		session.close();
+		
+		return list;
+	}
+
+	public Board findBoardByNo(int no) {
+		Board board = null;
+		SqlSession session = getSession();
+		
+		board = new BoardDao().findBoardByNo(session, no);
+		
+		session.close();
+		
+		return board;
 	}
 }
