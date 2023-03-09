@@ -3,6 +3,7 @@ package com.kh.mybatis.board.model.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.security.Provider.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -237,12 +238,82 @@ class BoardServiceTest {
 		
 		board = service.findBoardByNo(122); // 게시글 번호를 매개값으로 넘겨준다.
 		
-		System.out.println(board);
-		System.out.println(board.getReplies());
+//		System.out.println(board);
+//		System.out.println(board.getReplies());
 		
 		assertThat(board).isNotNull();
 		assertThat(board.getNo()).isEqualTo(122);
+		assertThat(board.getReplies().size()).isGreaterThan(0);
 	}
+	
+	@Test
+	@Order(10)
+	@DisplayName("게시글 등록 테스트")
+	public void insertBoard() {
+		int result = 0;
+		Board board = new Board();
+		
+		board.setWriterNo(9);
+		board.setTitle("mybatis 게시글");
+		board.setContent("mybatis로 게시글을 작성하였습니다.");
+		board.setOriginalFileName("test.txt");
+		board.setRenamedFileName("test.txt");
+		
+		result = service.save(board);
+		
+//		System.out.println(board);
+		
+		assertThat(result).isGreaterThan(0);
+		assertThat(board.getNo()).isGreaterThan(0);
+		assertThat(service.findBoardByNo(board.getNo())).isNotNull();
+	}
+	
+	@ParameterizedTest
+	@MethodSource("boardProvider")
+	@Order(11)
+	@DisplayName("게시글 수정 테스트")
+	void updateBoardTest(Board board) {
+		int result = 0;
+		
+		// 중복되는 메소드를 아래쪽에 따로 빼주었기 때문에 삭제
+		// PageInfo를 바로 생성 후 넘겨주기
+//		List<Board> list = service.findAll(new PageInfo(1, 10, service.getBoardCount(), 10));
+//		Board board = list.get(0); // 가장 마지막에 작성 된 게시글
+		
+		board.setTitle("mybatis 게시글 수정");
+		board.setContent("mybatis 게시글을 수정하였습니다.");
+		board.setOriginalFileName(null);
+		board.setRenamedFileName(null);
+
+		result = service.save(board);
+		
+		System.out.println(board);
+		
+		assertThat(result).isGreaterThan(0);
+		// extracting : 특정 필드를 추출하여 테스트를 할 수 있다. 
+		assertThat(service.findBoardByNo(board.getNo())).isNotNull().extracting("title").isEqualTo("mybatis 게시글 수정");
+		
+	}
+	
+	@ParameterizedTest
+	@MethodSource("boardProvider")
+	@Order(12)
+	@DisplayName("게시글 삭제 테스트")
+	void deleteBoardTest(Board board) {
+//		System.out.println(board);
+		
+		int result = 0;
+		
+		// 최근 게시글의 no값을 넘겨준다.
+		result = service.delete(board.getNo());
+		
+		// no값은 중복되지 않으므로 1개만 조회된다.
+		assertThat(result).isEqualTo(1);
+		assertThat(service.findBoardByNo(board.getNo())).isNull();
+	}
+	
+	// 정적 메소드는 생성 후 테스트 실행 시 전체적으로 실행해줘야 에러가 나지 않음
+	// 중복되는 메소드 따로 생성
 	
 	public static Stream<Arguments> filterProvider() {
 		return Stream.of(
@@ -250,5 +321,13 @@ class BoardServiceTest {
 			Arguments.arguments((Object) new String[] {"B2", "B3"}),
 			Arguments.arguments((Object) new String[] {"B3"})
 		);
+	}
+	
+	public static Stream<Arguments> boardProvider() {
+		// 정적 메소드에서 정적 필드는 직접 접근할 수 있지만 인스턴스 필드들은 소멸되어서 사용 X, 새로 생성 후 사용
+		BoardService service = new BoardService();
+		List<Board> list = service.findAll(new PageInfo(1, 10, service.getBoardCount(), 10));
+		
+		return Stream.of(Arguments.arguments(list.get(0)));
 	}
 }

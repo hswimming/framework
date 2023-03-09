@@ -28,24 +28,37 @@
 		<result property="createDate" column="CREATE_DATE"/>
 	</resultMap>
 	
-	<!-- extends 속성은 다른 resultMap을 상속하는 속성이다.
+	<!-- 1. 쿼리문을 각각 만들어서 하나의 ResultMap에서 매핑하는 방법
+		
+		extends 속성은 다른 resultMap을 상속하는 속성이다.
 	
 		 collection 태그는 컬렉션에 해당하는 필드에 조회 결과를 매핑할 때 사용한다.
 		 	- javaType 속성은 컬렉션 필드의 자바 타입을 지정한다.
 		 	- select 속성은 조회하고자 하는 select 쿼리문의 id를 입력한다.
-		 	- column 속성은 조회하고자 하는  쿼리문에 파라미터를 전달할 때 사용한다.
+		 	- column 속성은 조회하고자 하는 쿼리문에 파라미터를 전달할 때 사용한다.
 		 	
 		 * 1:1 관계인 객체를 조회하고 싶다면 association 요소를 사용해서 매핑해주면 된다. (사용방법 collection과 동일)
 		   (collection : 조회 결과가 여러개일때 사용 / association : 조회 결과가 한개일때 사용)
-	 -->
+		   
 	<resultMap id="boardDetailResultMap" type="Board" extends="boardListResultMap">
 		<result property="content" column="CONTENT"/>
 		<result property="type" column="TYPE"/>
 		<result property="modifyDate" column="MODIFY_DATE"/>
 		<collection property="replies" javaType="arraylist" select="selectRepliesByNo" column="NO"/>
-		<!-- replies에 selct 조회 결과를 매핑한다. -->
-		<!-- javaType="arraylist" : 내장별칭 -->
-		<!-- column="NO" : 파라미터는(#{no}) 컬럼 속성으로 지정해주면 쿼리문의 조회된 결과를 파라미터 값에 넘겨준다. -->
+		
+		replies에 selct 조회 결과를 매핑한다.
+		javaType="arraylist" : 내장별칭
+		column="NO" : 파라미터는(#{no}) 컬럼 속성으로 지정해주면 쿼리문의 조회된 결과를 파라미터 값에 넘겨준다.
+	</resultMap>
+	 -->
+	 
+	 <!-- 2. 하나의 쿼리문을 만들어서 하나의 ResultMap에서 매핑하는 방법 -->
+	 <!-- columnPrefix를 지정하면 column의 설정 값에 접두사를 붙인 명칭으로 매핑이 이루어지게 된다. -->
+	 <resultMap id="boardDetailResultMap" type="Board" extends="boardListResultMap">
+		<result property="content" column="CONTENT"/>
+		<result property="type" column="TYPE"/>
+		<result property="modifyDate" column="MODIFY_DATE"/>
+		<collection property="replies" javaType="arraylist" columnPrefix="R_" resultMap="replyResultMap"/>
 	</resultMap>
 	
 	<resultMap id="replyResultMap" type="Reply">
@@ -107,6 +120,7 @@
 		<!-- 
 			2. <choose>, <when>, <otherwise>를 활용한 검색 기능 구현
 			선택적으로 하기 때문에 현재 쿼리문에서는 choose를 사용하는 게 좋다!
+			
 		<include refid="boardListSql"/>
 		<choose>
 			<when test="writer != null">
@@ -129,6 +143,7 @@
 			3. <where>와 다중 <if>를 활용한 검색 기능 구현
 			조건을 모두 만족하지 않을 경우 AND를 제거하고 B.STATUS = 'Y'만 포함
 			where절에 AND가 있으면 신텍스 에러, 자동으로 AND를 지워준다.
+			
 		SELECT B.NO, 
 			   B.TITLE, 
 			   M.ID, 
@@ -248,7 +263,7 @@
 		<!-- 변수명에 상관 없이 list로 넘겨줄 경우 list로 접근해야 한다. -->
 		<!-- <if test="list != null"> -->
 		
-		<!-- filters를 map에 담아주었기 때문에 접근 가능 -->
+		<!-- Dao에서 filters를 map에 담아주었기 때문에 접근 가능 -->
 		<if test="filters != null">
 			<!-- 
 				AND B.TYPE IN ('B2', 'B3')
@@ -267,7 +282,7 @@
 	<!-- 게시글 상세 조회 (댓글 포함) -->
 	<!-- 
 		1. 쿼리문을 각각 만들어서 하나의 ResultMap에서 매핑하는 방법
-	-->
+	
 	<select id="selectBoardByNo" parameterType="_int" resultMap="boardDetailResultMap">
 		SELECT B.NO, 
 			   B.TITLE, 
@@ -281,14 +296,16 @@
 			   B.MODIFY_DATE
 		FROM BOARD B
 		JOIN MEMBER M ON(B.WRITER_NO = M.NO)
-		WHERE B.STATUS = 'Y' AND B.NO=#{no}
-		<!-- B.NO=#{no} : 파라미터의 변수명으로 접근 -->
+		WHERE B.STATUS = 'Y' AND B.NO = #{no}
+		
+		B.NO = #{no} : 파라미터의 변수명으로 접근
 	</select>
+	-->
 	
 	<!-- 댓글 목록 조회 -->
 	<!-- resultMap에서 쿼리문 실행 -->
 	<!-- parameterType="_int" : integer 타입(no) -->
-	<!-- <select id="selectRepliesByNo" parameterType="_int" resultType="Reply"> -->
+	<!-- <select id="selectRepliesByNo" parameterType="_int" resultType="Reply">
 	<select id="selectRepliesByNo" parameterType="_int" resultMap="replyResultMap">
 		SELECT R.NO, 
 			   R.BOARD_NO, 
@@ -298,8 +315,127 @@
 			   R.MODIFY_DATE
 		FROM REPLY R
 		JOIN MEMBER M ON(R.WRITER_NO = M.NO)
-		WHERE R.STATUS='Y' AND BOARD_NO=#{no}
+		WHERE R.STATUS='Y' AND BOARD_NO = #{no}
 		ORDER BY R.NO DESC
 	</select>
+	-->
 	
+	<!-- 2. 하나의 쿼리문을 만들어서 하나의 ResultMap에서 매핑하는 방법 -->
+	<!-- left outer join이 있는 쿼리문, 그냥 join 하면 댓글이 없을 경우 게시글이 조회되지 않는다. -->
+	<!-- board와 reply 테이블에서 동일한 컬럼명은 별칭을 붙여주지 않을 경우 조회 결과 시 뒤에 CREATE_DATE_1 으로 붙기 때문에 별칭을 붙여줘야 한다. -->
+	<select id="selectBoardByNo" parameterType="_int" resultMap="boardDetailResultMap">
+		SELECT B.NO,
+	       B.TITLE, 
+	       M.ID, 
+	       B.READCOUNT,
+	       B.ORIGINAL_FILENAME,
+	       B.RENAMED_FILENAME,
+	       B.CONTENT,
+	       B.TYPE,
+	       B.CREATE_DATE,
+	       B.MODIFY_DATE,
+	       R.NO AS "R_NO",
+	       R.BOARD_NO AS "R_BOARD_NO",
+	       R.CONTENT AS "R_CONTENT",
+	       M2.ID AS "R_ID",
+	       R.CREATE_DATE AS "R_CREATE_DATE",
+	       R.MODIFY_DATE AS "R_MODIFY_DATE"
+		FROM BOARD B
+		JOIN MEMBER M ON(B.WRITER_NO = M.NO)
+		LEFT JOIN REPLY R ON(B.NO = R.BOARD_NO)
+		LEFT JOIN MEMBER M2 ON(R.WRITER_NO = M2.NO)
+		WHERE B.STATUS = 'Y' AND B.NO = #{no}
+	</select>
+	
+	<!-- 게시글 등록, 수정 같은 경우 실행 후 결과값이 정수값으로 리턴되므로 타입을 따로 작성해주지 않았다. -->
+	
+	<!-- 게시글 등록 -->
+	<!-- DEFAULT인 부분은 자동으로 들어가기 때문에 지우고 작성했음 -->
+	<insert id="insertBoard" parameterType="Board"
+			useGeneratedKeys="true" keyProperty="no" keyColumn="NO">
+		INSERT INTO BOARD (
+			NO,
+			WRITER_NO,
+			TITLE,
+			CONTENT,
+			ORIGINAL_FILENAME,
+			RENAMED_FILENAME
+		)
+		VALUES(
+			SEQ_BOARD_NO.NEXTVAL,
+			#{writerNo},
+			#{title},
+			#{content},
+			#{originalFileName},
+			#{renamedFileName}
+		)
+	</insert>
+	
+	<!-- 게시글 수정 -->
+	<update id="updateBoard" parameterType="Board">
+		<!-- 
+			1. 기존 JDBC에서 사용하던 쿼리를 활용한 update 구문 작성
+			
+		UPDATE BOARD 
+		SET 
+			TITLE = #{title},
+			CONTENT = #{content},
+			ORIGINAL_FILENAME = #{originalFileName},
+			RENAMED_FILENAME = #{renamedFileName},
+			MODIFY_DATE = SYSDATE 
+		WHERE NO = #{no}
+		-->
+		
+		<!--
+			2. <set>괴 디증 <if>를 활용한 update 구문 작성
+			MODIFY_DATE 업데이트는 필수이므로 if 구문에 넣지 X
+			끝에 ,가 있어도 에러가 생기지 않음 (알아서 제거해줌)
+			set구문 밖으로 MODIFY_DATE를 뺄 경우, if문 안에서 ,로 끝난 뒤에 set해주려고 하기 때문에 에러가 발생
+			
+		UPDATE BOARD
+		<set>
+			<if test="title != null">
+				TITLE = #{title},
+			</if>		
+			<if test="content != null">
+				CONTENT = #{content},
+			</if>
+			<if test="originalFileName != null">
+				ORIGINAL_FILENAME = #{originalFileName},
+			</if>
+			<if test="renamedFileName != null">
+				RENAMED_FILENAME = #{renamedFileName},
+			</if>
+			MODIFY_DATE = SYSDATE
+		</set>
+		WHERE NO = #{no}
+		-->
+		
+		<!-- 
+			3. <trim>과 다중 <if>를 활용한 update 구문 작성
+			suffixOverrides : 실행될 쿼리의 <trim> 문 안에 쿼리 가장 뒤에 해당하는 문자들이 있으면 자동으로 지워준다.
+		-->
+		UPDATE BOARD
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="title != null">
+				TITLE = #{title},
+			</if>		
+			<if test="content != null">
+				CONTENT = #{content},
+			</if>
+			<if test="originalFileName != null">
+				ORIGINAL_FILENAME = #{originalFileName},
+			</if>
+			<if test="renamedFileName != null">
+				RENAMED_FILENAME = #{renamedFileName},
+			</if>
+			MODIFY_DATE = SYSDATE
+		</trim>
+		WHERE NO = #{no}
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<update id="updateStatus">
+		UPDATE BOARD SET STATUS = #{status} WHERE NO = #{no}
+	</update>
 </mapper>

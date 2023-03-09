@@ -116,7 +116,6 @@ public class BoardDao {
 		Map<String, Object> map = new HashMap<>();
 		
 		map.put("filters", filters);
-//		map.put("pageInfo", pageInfo);
 		
 //		return session.selectList("boardMapper.selectAllByFilters", filters);
 //		return session.selectList("boardMapper.selectAllByFilters", Arrays.asList(filters));
@@ -126,5 +125,27 @@ public class BoardDao {
 	public Board findBoardByNo(SqlSession session, int no) {
 		
 		return session.selectOne("boardMapper.selectBoardByNo", no);
+	}
+
+	public int insertBoard(SqlSession session, Board board) {
+		
+		// 쿼리문의 ? 부분에는 board의 인스턴스가 들어가기 때문에 매개값으로 넘겨주는 것
+		return session.insert("boardMapper.insertBoard", board);
+	}
+
+	public int updateBoard(SqlSession session, Board board) {
+		
+		return session.update("boardMapper.updateBoard", board);
+	}
+
+	public int updateStatus(SqlSession session, int no, String status) {
+		// 숫자타입과 문자타입이 같이 있으므로 Object 타입으로 받아준다.
+		Map<String, Object> map = new HashMap<>();
+		
+		// 오토박싱으로 정수 -> 오브젝트 타입으로 변경
+		map.put("no", no);
+		map.put("status", status);
+		
+		return session.update("boardMapper.updateStatus", map);
 	}
 }

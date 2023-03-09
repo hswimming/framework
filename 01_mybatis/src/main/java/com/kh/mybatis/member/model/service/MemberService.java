@@ -5,19 +5,25 @@ import org.apache.ibatis.session.SqlSession;
 import com.kh.mybatis.member.model.dao.MemberDao;
 import com.kh.mybatis.member.model.vo.Member;
 
+import lombok.extern.slf4j.Slf4j;
+
 import static com.kh.mybatis.common.template.SqlSessionTemplate.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class MemberService {
-
+	
 	public int getMemberCount() {
 		int count = 0;
 //		SqlSession session = SqlSessionTemplate.getSession();
 		SqlSession session = getSession(); // 클래스명 생략
 		
 		count = new MemberDao().getMemberCount(session);
+		
+		log.info("getMemberCount() 메소드 호출");
+		log.debug("getMemberCount() 메소드 호출 - " + count);
 		
 		// connection에 반환 (connection 대신 SqlSession 사용)
 		session.close();
