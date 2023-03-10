@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- root-context 파일에 작성했었지만, 절대 파일 생성 후 관련 있는 것들끼리 묶어준다. -->
+
+	<!-- 
+		Dog dog = new Dog();
+		
+		dog.setName("보리");
+	-->
+	<!-- 기본 생성자로 bean을 만들기 때문에 기본 생성자도 넣어줘야 한다.
+	<bean id="dog" class="com.kh.di.pet.Dog">
+		<property name="name" value="보리"/>
+	</bean>
+	-->
+	
+	<bean id="dog" class="com.kh.di.pet.Dog" p:name="보리"/>
+	
+	<!-- 
+		Cat cat = new Cat("콜리");
+	-->
+	<!-- 
+	<bean id="cat" class="com.kh.di.pet.Cat">
+		<constructor-arg name="name" value="콜리"/>
+	</bean>
+	-->
+	
+	<!-- 
+	<bean id="cat" class="com.kh.di.pet.Cat">
+		<constructor-arg index="0" value="콜리"/>
+	</bean>
+	-->
+	
+	<!-- <bean id="cat" class="com.kh.di.pet.Cat" c:name="콜리"/> -->
+	
+	<!-- 인덱스를 통해서 생성 -->
+	<!-- <bean id="cat" class="com.kh.di.pet.Cat" c:_0="콜리"/> -->
+	
+	<!-- 생성자의 매개값이 하나일 경우 아래와 같이 작성이 가능하다. -->
+	<bean id="cat" class="com.kh.di.pet.Cat" c:_="콜리"/>
+</beans>
