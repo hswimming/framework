@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 
+		Aspectj 어노테이션을 기반 에스펙트 적용을 위한 프록시 설정
+	-->
+	<!-- 어노테이션을 기반으로 했을 때 프록시 객체를 자동으로 생성해준다. -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<!-- xml로 빈 생성하는 방법 -->
+	<!-- 기본 생성자만 있을 경우 C 네임 스페이스를 사용하지 못한다. -->
+	<bean id="character" class="com.kh.aop.character.Character" p:name="수수수수" p:level="99" p:weapon-ref="bow"/>
+	
+	<!-- 인터페이스 타입으로 빈을 생성할 경우 인터페이스로 프록시를 생성한다. -->
+	<bean id="sword" class="com.kh.aop.weapon.Sword" p:name="크리스탈 소드"/>
+	
+	<bean id="bow" class="com.kh.aop.weapon.Bow" p:name="윈드포스"></bean>
+	
+	<!-- 
+		Aspect로 지정할 객체는 반드시 빈으로 선언되어야 한다.
+		
+		* 포인트 커트 표현식
+		  - 스프링 AOP에서 포인트 커트는 AspectJ의 포인트 커트 표현식을 이용해서 정의한다.
+		  - 스프링 AOP에서 지원되는 AspectJ의 포인트 커트 지정자
+		  	execution([접근제한자] 리턴타입-메소드의 반환값 클래스이름-풀패키지명.메소드명(파라미터))
+		  	메소드 실행에 대한 포인트 커트 지정자
+		  	해당하는 메소드가 실행했을 때 밑에 정의되어 있는 어드바이스를 지정해준다.
+		  	
+			"*" : 모든 값을 표현한다. 반환형은 아무거나 상관 없음, 메소드 앞에 패키지명까지 작성
+			".." : 매개변수가 몇개가 와도 상관 없음 (0개 이상)
+			args() : 대상 메소드에 전달되는 파라미터 값을 어드바이스에 전달하기 위한 지정자이다.
+	-->
+	<!-- 빈 자체를 Aspect로 생성 -->
+	<bean id="characterAspect" class="com.kh.aop.aspect.CharacterAspect"/>
+	
+	<!-- 
+	가장 최상위 요소
+	<aop:config>
+		Aspect로 만들려고 했던 빈의 아이디
+		<aop:aspect ref="characterAspect"> 
+			중복되는 포인트컷을 선언 후 사용
+			<aop:pointcut 
+				id="questPointcut" 
+				expression="execution(* com.kh.aop.character.Character.quest(..)) and args(questName)"/>
+		
+			pointcut : 무수히 많은 조인 포인트 중 내가 적용시킬 조인 포인트
+			before 어드바이스 : 퀘스트라는 메소드가 실행되기 전 비포라는 메소드가 먼저 실행되도록 한다.
+			<aop:before 
+				pointcut-ref="questPointcut"
+				method="beforeQuest"/>
+			
+			<aop:after 
+				pointcut="execution(* com.kh.aop.character.Character.quest(..))"
+				method="afterQuest"/>
+			
+			returning : 리턴받을 변수의 이름을 지정 리턴받을 변수의 값
+			<aop:after-returning
+				pointcut-ref="questPointcut"
+				returning="result"
+				method="questSuccess"/>
+				
+			<aop:after-throwing 
+				pointcut-ref="questPointcut"
+				throwing="exception"
+				method="questFail"/>
+			
+			<aop:after-returning 
+				pointcut="execution(* com.kh.aop.character.Character.quest(..))"
+				method="questSuccess"/>
+			<aop:after-throwing 
+				pointcut="execution(* com.kh.aop.character.Character.quest(..))"
+				method="questFail"/>
+		<aop:around 
+             pointcut="execution(* com.kh.aop.character.Character.quest(..))"
+             method="aroundQuest"/>
+		</aop:aspect>
+	</aop:config>
+	-->
+	
+</beans>
