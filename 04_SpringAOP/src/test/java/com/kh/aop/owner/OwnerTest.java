@@ -31,4 +31,11 @@ class OwnerTest {
 		assertThat(owner.getAge()).isGreaterThan(0);
 		assertThat(owner.getPet()).isNotNull();
 	}
+	
+	@Test
+	void barkTest() throws Exception {
+//		System.out.println(owner.getPet().bark());
+		
+		assertThat(owner.getPet().bark()).isNotNull();
+	}
 }

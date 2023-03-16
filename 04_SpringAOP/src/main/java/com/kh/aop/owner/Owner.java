@@ -22,7 +22,7 @@ public class Owner {
 	private int age;
 	
 	@Autowired
-	@Qualifier("cat") // 얻어오고자 하는 빈의 아이디를 준다. (해당 아이디의 내용으로 출력됨)
+//	@Qualifier("cat") // 얻어오고자 하는 빈의 아이디를 준다. (해당 아이디의 내용으로 출력됨)
 	private Pet pet;
 
 }

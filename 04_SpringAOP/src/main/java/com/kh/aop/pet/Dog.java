@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import com.kh.aop.annotation.Repeat;
+
 import lombok.Getter;
 import lombok.ToString;
 
@@ -17,7 +19,15 @@ public class Dog extends Pet {
 	private String name;
 	
 	@Override
-	public String bark() {
+	@Repeat(count = 2) // 카운트 횟수 만큼 출력
+	public String bark() throws Exception {
+		// 선언부 (메소드 시그니처) 어노테이션에 있는 정보까지 가져간다.
+		
+		
+//		if(true) {
+//			throw new Exception();
+//		}
+		
 		return "멍멍~!";
 	}
 
