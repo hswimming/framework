@@ -30,5 +30,4 @@ public class Dog extends Pet {
 		
 		return "멍멍~!";
 	}
-
 }
