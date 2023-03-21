@@ -21,7 +21,11 @@
 </h1>
 	
 	<P>  The time on the server is ${serverTime}. </P>
-	
+	<p>
+		<a href="${ path }/board/list">
+			게시글 조회
+		</a>
+	</p>
 	<c:if test="${ empty loginMember }">
 		<form action="${ path }/login" method="POST">
 			<label for="userId">아이디 : </label>
