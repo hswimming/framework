@@ -46,6 +46,7 @@ public class MultipartFileUtil {
 		
 		File file = new File(location);
 		
+		// 파일이 실제로 존재하는지 확인 후 있을 경우 삭제
 		if(file.exists()) {
 			file.delete();
 		}

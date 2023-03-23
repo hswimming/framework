@@ -42,12 +42,7 @@
 							<span> - </span>
 						</c:if>
 						<c:if test="${ not empty board.originalFileName }">
-							<%-- 
 							<a href="javascript:" id="fileDown">
-								<span> ${ board.originalFileName } </span>
-							</a>
-							--%>
-							<a href="${ path }/resources/upload/board/${board.renamedFileName}">
 								<span> ${ board.originalFileName } </span>
 							</a>
 						</c:if>

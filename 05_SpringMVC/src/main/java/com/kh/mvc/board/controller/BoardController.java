@@ -1,18 +1,28 @@
 package com.kh.mvc.board.controller;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.kh.mvc.board.model.service.BoardService;
@@ -185,4 +195,137 @@ public class BoardController {
 		return modelAndView;
 	}
 	
+	@GetMapping("/fileDown")
+	public ResponseEntity<Resource> fileDown(
+			@RequestParam String oname, @RequestParam String rname,
+			@RequestHeader("user-agent") String userAgent) { // 어노테이션을 통해서 읽어올 수 있다. (매개값으로 헤더명을 주면 자동으로 값을 주입해준다.)
+		Resource resource = null;
+		String downName = null;
+		
+		log.info("oname : {}, rname : {}", oname, rname);
+		
+		try {
+			
+			// 1. 클라이언트로 전송할 파일을 가져온다.
+			resource = resourceLoader.getResource("resources/upload/board/"+ rname); // 원하는 파일을 오브젝트의 형태로 가져온다.
+			
+			// 2. 브라우저별 인코딩 처리
+		    // String userAgent = request.getHeader("user-agent"); // 기존 서블릿에서 사용했던 방식, 현재 @RequestHeader을 사용해서 처리
+		    boolean isMSIE = userAgent.indexOf("MSIE") != -1 || userAgent.indexOf("Trident") != -1;
+		       
+		    if(isMSIE) {
+				downName = URLEncoder.encode(oname, "UTF-8").replaceAll("\\+", "%20");
+				
+		    } else {
+		       downName = new String(oname.getBytes("UTF-8"), "ISO-8859-1");         
+		    }
+	    
+		  // 3. 응답 메시지 작성 & 클라이언트로 출력(전송)하기
+//		    return "redirect:/board/list";
+		    
+		    return ResponseEntity.ok()
+		    					 .header(HttpHeaders.CONTENT_TYPE, "application/octet-stream") // 모든 종류의 2진 데이터를 의미
+		    					 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + downName)
+		    					 .body(resource); // 직접 스트림을 얻어오지 않아도 DispatcherServlet이 return 받아준다.
+		    
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//			return ResponseEntity.status(500) // 상태 코드를 500으로 직접 줘도 된다.
+		}
+	}
+	
+	@GetMapping("/update")
+	public ModelAndView update(
+			ModelAndView modelAndView, @RequestParam int no,
+			@SessionAttribute("loginMember") Member loginMember) {
+		Board board = null;
+		
+		log.info("no : {}", no);
+		log.info(loginMember.toString());
+		
+		board = service.findBoardByNo(no); // 매개값으로 전달되는 파라미터로 조회
+		
+		if (board != null && board.getWriterId().equals(loginMember.getId())) {
+			modelAndView.addObject("board", board);
+			modelAndView.setViewName("board/update");
+			
+		} else {
+			modelAndView.addObject("msg", "잘못된 접근입니다.");
+			modelAndView.addObject("location", "/board/list");
+			modelAndView.setViewName("common/msg");
+		}
+		
+		return modelAndView;
+	}
+	
+	@PostMapping("/update")
+	public ModelAndView update(
+			ModelAndView modelAndView,
+			@RequestParam("upfile") MultipartFile upfile,
+			@RequestParam int no, @RequestParam String title, @RequestParam String content,
+			@SessionAttribute("loginMember") Member loginMember) { // 로그인 멤버를 세션에 담아서 사용하지 않고 매개값으로 준다.
+		
+		int result = 0; // update 결과를 정수형으로 반환
+		Board board = null;
+		
+		log.info("{}, {}, {}", new Object[] {no, title, content}); // 오브젝트 배열로 받아온다
+		
+		board = service.findBoardByNo(no);
+
+		// 게시글 번호로 해당 게시글의 번호가 있는지 조회
+		if (board != null && board.getWriterId().equals(loginMember.getId())) {
+			
+			// 새로운 파일을 저장하는 로직
+			if (upfile != null && !upfile.isEmpty()) { // upfile이 null이 아니면서 비어있지 않을 경우
+				String location = null;
+				String renamedFileName = null;
+				
+				try {
+					location = resourceLoader.getResource("resources/upload/board").getFile().getPath();
+					
+					// 이전에 업로드된 첨부파일 삭제
+					if (board.getRenamedFileName() != null) {
+						MultipartFileUtil.delete(location + "/" + board.getRenamedFileName()); // 경로가 포함된 파일명 (물리적인 위치에 저장된 파일 이름)
+					}
+					
+					renamedFileName = MultipartFileUtil.save(upfile, location);
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				if (renamedFileName != null) {
+					board.setOriginalFileName(upfile.getOriginalFilename());
+					board.setRenamedFileName(renamedFileName);
+				}
+			} 
+			
+			board.setTitle(title); // 매개값으로 받은 title을 set (수정된 제목)
+			board.setContent(content); // 매개값으로 받은 content를 set (수정된 내용)
+			
+			result = service.save(board);
+			
+			if (result > 0) { // return 해주는 결과 값에 따라 실행
+				modelAndView.addObject("msg", "게시글이 정상적으로 수정되었습니다.");
+//				modelAndView.addObject("location", "/board/update?no=" + board.getNo());
+				modelAndView.addObject("location", "/board/view?no=" + board.getNo()); // 수정 성공하면 상세조회 페이지로 이동
+				
+			} else {
+				modelAndView.addObject("msg", "게시글 수정을 실패하였습니다.");
+				modelAndView.addObject("location", "/board/update?no=" + board.getNo());
+			}
+			
+		} else {
+			modelAndView.addObject("msg", "잘못된 접근입니다.");
+			modelAndView.addObject("location", "/board/list");
+		}
+		
+//		modelAndView.addObject("msg", "게시글 수정 테스트");
+//		modelAndView.addObject("location", "/board/update?no=" + no);
+		modelAndView.setViewName("common/msg"); // 게시글의 목록으로 돌아가게 한 후 포워딩
+
+		return modelAndView;
+	}
 }

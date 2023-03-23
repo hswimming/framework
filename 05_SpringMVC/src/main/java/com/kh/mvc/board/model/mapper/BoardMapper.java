@@ -12,6 +12,7 @@ import com.kh.mvc.board.model.vo.Board;
 public interface BoardMapper {
 	
 	// 실행시키고자 하는 쿼리문의 아이디와 동일한 추상 메소드 생성 (파라미터, 반환 타입)
+	
 	int selectBoardCount();
 	
 	List<Board> selectAll(RowBounds bounds); // 매개값을 받도록
@@ -22,4 +23,6 @@ public interface BoardMapper {
 	int updateStatus(@Param("no") int no, @Param("status") String status);
 	
 	int insertBoard(Board board);
+	
+	int updateBoard(Board board); // 매개값으로 board 타입의 오브젝트를 받도록
 }

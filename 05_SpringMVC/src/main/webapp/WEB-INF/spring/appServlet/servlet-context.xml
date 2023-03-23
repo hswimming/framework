@@ -78,6 +78,7 @@
 			<exclude-mapping path="/member/idCheck"/>
 			<exclude-mapping path="/board/list"/>
 			<exclude-mapping path="/board/view"/>
+			<exclude-mapping path="/board/fileDown"/>
 			
 			<!-- 인터셉터를 등록하는 요소 -->
 			<beans:bean id="loginCheckInterceptor" class="com.kh.mvc.common.interceptor.LoginCheckInterceptor"/>

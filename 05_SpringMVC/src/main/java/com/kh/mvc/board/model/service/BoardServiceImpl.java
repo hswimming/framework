@@ -52,6 +52,7 @@ public class BoardServiceImpl implements BoardService {
 		
 		if (board.getNo() > 0) {
 			// update
+			result = mapper.updateBoard(board);
 			
 		} else {
 			// insert
