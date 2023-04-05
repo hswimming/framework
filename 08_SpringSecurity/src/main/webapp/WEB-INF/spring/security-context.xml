@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:c="http://www.springframework.org/schema/c"
+   xmlns:p="http://www.springframework.org/schema/p"
+   xmlns:security="http://www.springframework.org/schema/security"
+   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+	<bean id="bcryptPasswordEncoder"
+		  class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"
+	/>
+	
+	<!-- security 보안 대상을 제외하는 설정 (현재 따로 나눠져 있어서 각각 작성) -->
+	<!-- resources 폴더 안에 있는 파일들은 security 대상이 아니라는 것을 나타낸다. -->
+	<security:http pattern="/js/**" security="none"></security:http>
+	<security:http pattern="/css/**" security="none"></security:http>
+	<security:http pattern="/images/**" security="none"></security:http>
+	
+	<!--
+		security:http
+		  - HTTP에 대한 요청을 안전하게 보호하는 방법을 설정하는 요소이다.
+		  - auto-config 속성 : 로그인, 로그아웃 등에 대한 기본 설정을 지정하는 속성이다.
+		  - use-expressions 속성 : SpEL(스프링 표현식)의 사용 여부를 지정하는 속성이다.
+	-->
+	<security:http auto-config="true" use-expressions="true">
+		<!--
+			security:intercept-url
+			  - pattern 속성에 해당하는 요청에 대한 접속 권한을 설정한다.
+			  - 로그인을 하지 않아도 모든 사용자가 접속할 수 있어야 한다. -> access="permitAll"
+			  - 어떤 요청을 하든 로그인 하도록 설정 (인증이 되어야 접근 가능) -> pattern="/**" access="isAuthenticated()"
+		-->
+		<security:intercept-url pattern="/login" access="permitAll"/>
+		<security:intercept-url pattern="/admin/**" access="hasRole('ADMIN')"/>
+		<security:intercept-url pattern="/member/**" access="hasAnyRole('ADMIN', 'USER')"/>
+		<security:intercept-url pattern="/**" access="isAuthenticated()"/>
+		<security:access-denied-handler error-page="/accessError"/>
+		
+		<!-- csrf 속성을 사용하지 않을 경우 설정 (기본적으로 csrf 공격을 방어하도록 설정되어 있다.)
+			<security:csrf disabled="true"/>
+		-->
+		
+		<!-- 로그인 폼 페이지 지정 -->
+ 		<!-- login-page="/login" : 내가 만든 로그인 폼을 열어줄 url 작성
+		
+			 기본적으로 정해져있는 로그인 아이디와 패스워드 name 속성을 바꿔주고 싶을 경우
+			   - username-parameter="userId"
+			   - password-parameter="userPwd"
+			   
+			 로그인 성공 시 이전 페이지로 이동 (홈으로 이동 X)
+			   - default-target-url="/"
+			   
+			 요청을 실패했을 경우 보낼 url 지정
+			   - authentication-failure-url="/login?err=true"
+		-->
+		<security:form-login
+			login-page="/login"
+			username-parameter="userId"
+			password-parameter="userPwd"
+			default-target-url="/"
+			authentication-failure-url="/login?error"
+		/>
+		
+		<!-- 기본값 : 로그아웃 시 로그인 페이지로 이동 (현재 홈으로 보내도록 설정 변경) -->
+		<security:logout
+			logout-url="/logout"
+			logout-success-url="/"
+		/>
+		
+		<!-- 기억하기 기능 활성화 -->
+		<!-- key="khweb" : 로그인 정보를 암호화 해서 쿠키에 담아줄 때 사용할 키 값
+		
+			 token-validity-seconds="1209600" : 토큰(쿠키) 유지 시간
+		-->
+		<security:remember-me key="khweb" token-validity-seconds="1209600"/>
+		
+		<!-- 로그인 세션 1개만 유지하기 -->
+		<security:session-management invalid-session-url="/login">
+			<security:concurrency-control max-sessions="1" expired-url="/login"/>
+		</security:session-management>
+	</security:http>
+	
+	<!--
+		security:authentication-manager
+		  - 유저들에 대한 인증과 관련된 설정을 하는 요소이다.
+		  - security:authentication-provider : 인증하는 사용자에 대한 정보
+		  - authorities : 권한
+		  - In Memory, DB, LDAP 등 다양한 방법으로 유저 조회 및 인증을 구현하여 설정해 줄 수 있다.
+		  
+		In Memory 방식 설정 (테스트 용도로 사용 - 초기에 테이블을 만들기 전 빠르게 구현하고 싶을 경우)
+	-->
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<security:password-encoder ref="bcryptPasswordEncoder"/>
+			<security:user-service>
+				<security:user name="user"
+							   password="$2a$10$tQ7jxV2b63HE7rnV7ePm3OcqS6v.jklc0.gY16HstiP20InwobqAK"
+							   authorities="ROLE_USER"/>
+				<security:user name="admin"
+							   password="$2a$10$tQ7jxV2b63HE7rnV7ePm3OcqS6v.jklc0.gY16HstiP20InwobqAK"
+							   authorities="ROLE_ADMIN,ROLE_USER"/>
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+</beans>
