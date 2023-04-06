@@ -40,5 +40,7 @@
 		<security:csrfInput/>
 		<input type="submit" value="로그인">
 	</form>
+	
+	<span style="color: red">${ loginFailMsg }</span>
 </body>
 </html>

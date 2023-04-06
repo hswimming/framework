@@ -15,5 +15,8 @@
 </head>
 <body>
 	<h1>관리자 전용 페이지</h1>
+	
+	<!-- 권한 보여주기 -->
+	<p><security:authentication property="authorities"/></p>
 </body>
 </html>

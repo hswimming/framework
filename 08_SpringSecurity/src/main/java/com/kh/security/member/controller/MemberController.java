@@ -2,13 +2,14 @@ package com.kh.security.member.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
 public class MemberController {
-	@GetMapping("/login")
+	@RequestMapping("/login") // 포워딩 시키는데 get 요청만 받게 하면 405에러
 	public String login() {
 		log.info("/login 페이지 요청");
 		

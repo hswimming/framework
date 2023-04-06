@@ -6,8 +6,21 @@
    xmlns:security="http://www.springframework.org/schema/security"
    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+      
 	<bean id="bcryptPasswordEncoder"
 		  class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"
+	/>
+	
+	<bean id="memberDetailsService"
+        class="com.kh.security.member.model.service.MemberDetailsService"
+   />
+	
+	<bean id="loginSuccessHandler"
+		  class="com.kh.security.common.handler.LoginSuccessHandler"
+	/>
+	
+	<bean id="loginFailureHandler"
+		  class="com.kh.security.common.handler.LoginFailureHandler"
 	/>
 	
 	<!-- security 보안 대상을 제외하는 설정 (현재 따로 나눠져 있어서 각각 작성) -->
@@ -52,12 +65,13 @@
 			 요청을 실패했을 경우 보낼 url 지정
 			   - authentication-failure-url="/login?err=true"
 		-->
+		
 		<security:form-login
 			login-page="/login"
 			username-parameter="userId"
 			password-parameter="userPwd"
-			default-target-url="/"
-			authentication-failure-url="/login?error"
+			authentication-success-handler-ref="loginSuccessHandler"
+			authentication-failure-handler-ref="loginFailureHandler"
 		/>
 		
 		<!-- 기본값 : 로그아웃 시 로그인 페이지로 이동 (현재 홈으로 보내도록 설정 변경) -->
@@ -87,7 +101,6 @@
 		  - In Memory, DB, LDAP 등 다양한 방법으로 유저 조회 및 인증을 구현하여 설정해 줄 수 있다.
 		  
 		In Memory 방식 설정 (테스트 용도로 사용 - 초기에 테이블을 만들기 전 빠르게 구현하고 싶을 경우)
-	-->
 	<security:authentication-manager>
 		<security:authentication-provider>
 			<security:password-encoder ref="bcryptPasswordEncoder"/>
@@ -99,6 +112,14 @@
 							   password="$2a$10$tQ7jxV2b63HE7rnV7ePm3OcqS6v.jklc0.gY16HstiP20InwobqAK"
 							   authorities="ROLE_ADMIN,ROLE_USER"/>
 			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+	-->
+	
+	<!-- Web 계정의 Member 테이블에서 유저 조회 및 인증을 구현하도록 설정 -->
+	<security:authentication-manager>
+		<security:authentication-provider user-service-ref="memberDetailsService">
+			<security:password-encoder ref="bcryptPasswordEncoder"/>
 		</security:authentication-provider>
 	</security:authentication-manager>
 </beans>

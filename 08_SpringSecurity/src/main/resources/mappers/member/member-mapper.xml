@@ -2,10 +2,44 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="com.kh.mvc.member.model.mapper.MemberMapper">
+<!-- mapper 인터페이스 패키지명 -->
+<mapper namespace="com.kh.security.member.model.mapper.MemberMapper">
 
+	<!--
 	<select id="selectCount" resultType="_int">
 		SELECT COUNT(*) FROM MEMBER
 	</select>
-
+	-->
+	
+	<resultMap id="memberResultMap" type="Member">
+		<id property="no" column="NO"/>
+		<result property="id" column="ID"/>
+		<result property="password" column="PASSWORD"/>
+		<result property="role" column="ROLE"/>
+		<result property="name" column="NAME"/>
+		<result property="phone" column="PHONE"/>
+		<result property="email" column="EMAIL"/>
+		<result property="address" column="ADDRESS"/>
+		<result property="hobby" column="HOBBY"/>
+		<result property="status" column="STATUS"/>
+		<result property="enrollDate" column="ENROLL_DATE"/>
+		<result property="modifyDate" column="MODIFY_DATE"/>
+	</resultMap>
+	
+	<select id="selectMemberById" parameterType="string" resultMap="memberResultMap">
+		SELECT NO,
+		       ID,
+		       PASSWORD,
+		       ROLE,
+		       NAME,
+		       PHONE,
+		       EMAIL,
+		       ADDRESS,
+		       HOBBY,
+		       STATUS,
+		       ENROLL_DATE,
+		       MODIFY_DATE
+		FROM MEMBER
+		WHERE ID = #{id}
+	</select>
 </mapper>
